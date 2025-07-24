@@ -16,7 +16,7 @@ class Santri {
       id: json['id'].toString(),
       nama: json['nama'].toString(),
       kelas: json['kelas']?.toString(),      
-       noInduk: json['no_induk']?.toString() ?? '',
+      noInduk: json['no_induk']?.toString() ?? '',
     );
   }
 

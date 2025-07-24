@@ -94,7 +94,68 @@ class _IzinScreenState extends State<IzinScreen> {
                       ],
                     ),
                   ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.orange),
+                        onPressed: () async {
+                          // Navigasi ke halaman edit dengan data izin
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TambahIzinScreen(izin: izin), 
+                            ),
+                          );
+                          if (result == true) {
+                            setState(() {
+                              _izinList = IzinService.fetchIzin();
+                            });
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Konfirmasi'),
+                              content: const Text('Yakin ingin menghapus data ini?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Batal'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Hapus'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            final success = await IzinService.deleteIzin(izin.id);
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Data berhasil dihapus')),
+                              );
+                              setState(() {
+                                _izinList = IzinService.fetchIzin();
+                              });
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Gagal menghapus data')),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
+
               );
             },
           );
@@ -111,7 +172,7 @@ class _IzinScreenState extends State<IzinScreen> {
           );
           if (result == true) {
             setState(() {
-              _izinList = IzinService.fetchIzin(); // ⬅ ini kuncinya
+              _izinList = IzinService.fetchIzin(); 
             });
           }
         },

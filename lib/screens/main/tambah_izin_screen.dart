@@ -6,7 +6,9 @@ import '../../services/izin_service.dart';
 import '../../services/santri_service.dart';
 
 class TambahIzinScreen extends StatefulWidget {
-  const TambahIzinScreen({super.key});
+  final Izin? izin;
+
+  const TambahIzinScreen({super.key, this.izin});
 
   @override
   State<TambahIzinScreen> createState() => _TambahIzinScreenState();
@@ -28,19 +30,19 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
   int? selectedKategori;
   int? selectedStatus;
 
+  bool get isEdit => widget.izin != null;
+  bool isLoading = false;
 
-  final List<Map<String, dynamic>> kategoriList = [
+  final List<Map<String, Object>> kategoriList = [
     {'label': 'Izin Keluar', 'value': 1},
     {'label': 'Izin Pulang', 'value': 2},
   ];
 
-  final List<Map<String, dynamic>> statusList = [
+  final List<Map<String, Object>> statusList = [
     {'label': 'Diberikan', 'value': 1},
     {'label': 'Dicabut', 'value': 0},
   ];
 
-
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -48,12 +50,50 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
     _fetchSantri();
   }
 
+  int? _getDropdownValue(List<Map<String, Object>> list, String label) {
+    final match = list.firstWhere(
+      (item) => (item['label'] as String).toLowerCase().trim() == label.toLowerCase().trim(),
+      orElse: () => {},
+    );
+    return match['value'] as int?;
+  }
+
+
   Future<void> _fetchSantri() async {
     try {
       final response = await SantriService.fetchAllSantri();
-      setState(() => santriList = response.data);
-    } catch (_) {}
+      setState(() {
+        santriList = response.data;
+
+        if (isEdit) {
+          final izin = widget.izin!;
+          selectedSantri = santriList.firstWhere(
+            (santri) => santri.nama == izin.nama,
+            orElse: () => Santri(id: '', nama: izin.nama, noInduk: '-', kelas: null),
+          );
+
+          searchController.text = '${selectedSantri?.nama ?? ''} (${selectedSantri?.noInduk ?? ''})';
+
+          try {
+            selectedTanggal = DateFormat('dd MMMM yyyy', 'id_ID').parse(izin.tanggal);
+          } catch (_) {
+            selectedTanggal = DateTime.tryParse(izin.tanggal);
+          }
+
+          keluarTime = _parseTimeOfDay(izin.keluar);
+          kembaliTime = _parseTimeOfDay(izin.kembali);
+
+          selectedKategori = _getDropdownValue(kategoriList, izin.kategori);
+          selectedStatus = _getDropdownValue(statusList, izin.status);
+
+          kategoriPelanggaranController.text = izin.kategoriPelanggaran;
+        }
+      });
+    } catch (e) {
+      // Tambahkan log jika diperlukan
+    }
   }
+
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
@@ -65,8 +105,6 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
-
     final request = IzinRequest(
       noInduk: selectedSantri!.noInduk,
       tanggal: DateFormat('yyyy-MM-dd').format(selectedTanggal!),
@@ -77,14 +115,27 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
       kategoriPelanggaran: kategoriPelanggaranController.text,
     );
 
-    final result = await IzinService.postIzin(request);
-    setState(() => _isLoading = false);
+    setState(() => isLoading = true);
+    bool success = false;
 
-    if (result) {
+    try {
+      success = isEdit
+          ? await IzinService.updateIzin(widget.izin!.id, request)
+          : await IzinService.postIzin(request);
+    } catch (e) {
+      // Handle error
+    }
+
+    setState(() => isLoading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(isEdit ? 'Berhasil diperbarui' : 'Berhasil disimpan')),
+      );
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal menyimpan izin')),
+        SnackBar(content: Text(isEdit ? 'Gagal memperbarui izin' : 'Gagal menyimpan izin')),
       );
     }
   }
@@ -92,7 +143,7 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedTanggal ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
@@ -106,11 +157,8 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
     );
     if (picked != null) {
       setState(() {
-        if (isKeluar) {
-          keluarTime = picked;
-        } else {
-          kembaliTime = picked;
-        }
+        if (isKeluar) keluarTime = picked;
+        else kembaliTime = picked;
       });
     }
   }
@@ -124,17 +172,17 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
 
   Widget _buildSantriSearch() {
     return Autocomplete<Santri>(
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        if (textEditingValue.text.isEmpty) return const Iterable<Santri>.empty();
+      optionsBuilder: (TextEditingValue val) {
+        if (val.text.isEmpty) return const Iterable<Santri>.empty();
         return santriList.where((s) =>
-            s.nama.toLowerCase().contains(textEditingValue.text.toLowerCase()) ||
-            s.noInduk.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+            s.nama.toLowerCase().contains(val.text.toLowerCase()) ||
+            s.noInduk.toLowerCase().contains(val.text.toLowerCase()));
       },
-      displayStringForOption: (Santri s) => '${s.nama} (${s.noInduk})',
-      onSelected: (Santri selection) {
+      displayStringForOption: (s) => '${s.nama} (${s.noInduk})',
+      onSelected: (s) {
         setState(() {
-          selectedSantri = selection;
-          searchController.text = '${selection.nama} (${selection.noInduk})';
+          selectedSantri = s;
+          searchController.text = '${s.nama} (${s.noInduk})';
         });
       },
       fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
@@ -143,12 +191,12 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
           controller: controller,
           focusNode: focusNode,
           onEditingComplete: onEditingComplete,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Cari Santri',
-            prefixIcon: const Icon(Icons.search),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            prefixIcon: Icon(Icons.search),
+            border: OutlineInputBorder(),
           ),
-          validator: (_) => selectedSantri == null ? 'Pilih nama santri' : null,
+          validator: (_) => selectedSantri == null ? 'Pilih santri' : null,
         );
       },
     );
@@ -158,7 +206,7 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Izin'),
+        title: Text(isEdit ? 'Edit Izin' : 'Tambah Izin'),
         backgroundColor: const Color(0xFF263238),
         foregroundColor: Colors.white,
       ),
@@ -171,7 +219,6 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
               _buildSantriSearch(),
               const SizedBox(height: 16),
               ListTile(
-                contentPadding: EdgeInsets.zero,
                 title: const Text("Tanggal Izin"),
                 subtitle: Text(selectedTanggal == null
                     ? "Belum dipilih"
@@ -180,16 +227,14 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
                 onTap: _pickDate,
               ),
               ListTile(
-                contentPadding: EdgeInsets.zero,
                 title: const Text("Jam Keluar"),
-                subtitle: Text(keluarTime == null ? "Belum dipilih" : keluarTime!.format(context)),
+                subtitle: Text(keluarTime?.format(context) ?? "Belum dipilih"),
                 trailing: const Icon(Icons.access_time),
                 onTap: () => _pickTime(true),
               ),
               ListTile(
-                contentPadding: EdgeInsets.zero,
                 title: const Text("Jam Kembali"),
-                subtitle: Text(kembaliTime == null ? "Belum dipilih" : kembaliTime!.format(context)),
+                subtitle: Text(kembaliTime?.format(context) ?? "Belum dipilih"),
                 trailing: const Icon(Icons.access_time),
                 onTap: () => _pickTime(false),
               ),
@@ -201,13 +246,13 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
                 ),
                 value: selectedKategori,
                 items: kategoriList
-                    .map((item) => DropdownMenuItem<int>(
-                          value: item['value'],
-                          child: Text(item['label']),
-                        ))
-                    .toList(),
+                .map((item) => DropdownMenuItem<int>(
+                      value: item['value'] as int,
+                      child: Text(item['label'] as String),
+                    ))
+                .toList(),
                 onChanged: (val) => setState(() => selectedKategori = val),
-                validator: (value) => value == null ? "Pilih kategori" : null,
+                validator: (val) => val == null ? 'Pilih kategori' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<int>(
@@ -217,15 +262,14 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
                 ),
                 value: selectedStatus,
                 items: statusList
-                    .map((item) => DropdownMenuItem<int>(
-                          value: item['value'],
-                          child: Text(item['label']),
-                        ))
-                    .toList(),
+                .map((item) => DropdownMenuItem<int>(
+                      value: item['value'] as int,
+                      child: Text(item['label'] as String),
+                    ))
+                .toList(),
                 onChanged: (val) => setState(() => selectedStatus = val),
-                validator: (value) => value == null ? "Pilih status" : null,
+                validator: (val) => val == null ? 'Pilih status' : null,
               ),
-
               const SizedBox(height: 16),
               TextFormField(
                 controller: kategoriPelanggaranController,
@@ -236,9 +280,13 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: Text(_isLoading ? "Menyimpan..." : "Simpan"),
-                onPressed: _isLoading ? null : _submitForm,
+                icon: Icon(isEdit ? Icons.edit : Icons.save),
+                label: Text(isLoading
+                    ? "Menyimpan..."
+                    : isEdit
+                        ? "Perbarui"
+                        : "Simpan"),
+                onPressed: isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF5B913B),
                   foregroundColor: Colors.white,
@@ -251,4 +299,9 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
       ),
     );
   }
+}
+
+TimeOfDay _parseTimeOfDay(String time) {
+  final parts = time.split(":");
+  return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
 }
