@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../screens/main/pelanggaran_screen.dart';
 class MenuIkonWidget extends StatefulWidget {
   const MenuIkonWidget({Key? key}) : super(key: key);
 
@@ -72,37 +72,64 @@ class _MenuIkonWidgetState extends State<MenuIkonWidget> {
 
   Widget _buildMenuItem(BuildContext context, _MenuItem item) {
     return GestureDetector(
-      onTap: () => _showComingSoonDialog(context, item.label),
-      child: Container(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(item.icon, color: Colors.white, size: 26),
-              ), // jarak atas-bawah dipersempit
-              Text(
-                item.label,
-                style: GoogleFonts.poppins(
-                  fontSize: 11, // diperbesar
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
+      onTap: () {
+        switch (item.label) {
+          case 'Pelanggaran':
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PelanggaranScreen()),
+            );
+            break;
+          case 'Izin':
+            // TODO: Ganti dengan screen Izin
+            _showComingSoonDialog(context, item.label);
+            break;
+          case 'Perlengkapan':
+            // TODO: Ganti dengan screen Perlengkapan
+            _showComingSoonDialog(context, item.label);
+            break;
+          case 'Kerapian':
+            // TODO: Ganti dengan screen Kerapian
+            _showComingSoonDialog(context, item.label);
+            break;
+          case 'Ketertiban':
+            // TODO: Ganti dengan screen Ketertiban
+            _showComingSoonDialog(context, item.label);
+            break;
+          default:
+            _showComingSoonDialog(context, item.label);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
+              child: Icon(item.icon, color: Colors.white, size: 26),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              item.label,
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
   }
+
 
 
   void _showComingSoonDialog(BuildContext context, String feature) {
