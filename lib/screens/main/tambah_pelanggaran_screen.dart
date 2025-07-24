@@ -42,12 +42,9 @@ class _PostPelanggaranScreenState extends State<PostPelanggaranScreen> {
       tanggalController.text = p.tanggal;
       jenisController.text = p.jenisPelanggaran;
       hukumanController.text = p.hukuman;
-      selectedKategori = _kategoriToValue(p.kategori); // konversi
-      searchController.text = p.nama;
-
-      
+      selectedKategori = _kategoriToValue(p.kategori);
+      searchController.text = p.nama;      
     }
-
   }
 
   Future<void> _fetchSantri() async {

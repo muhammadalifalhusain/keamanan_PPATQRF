@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../screens/main/pelanggaran_screen.dart';
+import '../screens/main/izin_screen.dart';
 class MenuIkonWidget extends StatefulWidget {
   const MenuIkonWidget({Key? key}) : super(key: key);
 
@@ -81,8 +82,10 @@ class _MenuIkonWidgetState extends State<MenuIkonWidget> {
             );
             break;
           case 'Izin':
-            // TODO: Ganti dengan screen Izin
-            _showComingSoonDialog(context, item.label);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const IzinScreen()),
+            );
             break;
           case 'Perlengkapan':
             // TODO: Ganti dengan screen Perlengkapan
@@ -129,8 +132,6 @@ class _MenuIkonWidgetState extends State<MenuIkonWidget> {
       ),
     );
   }
-
-
 
   void _showComingSoonDialog(BuildContext context, String feature) {
     showDialog(
