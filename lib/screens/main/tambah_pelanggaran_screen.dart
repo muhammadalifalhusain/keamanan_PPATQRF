@@ -225,7 +225,6 @@ class _PostPelanggaranScreenState extends State<PostPelanggaranScreen> {
       ),
     );
   }
-
   Widget _buildSantriSearch() {
     return Autocomplete<Santri>(
       optionsBuilder: (TextEditingValue textEditingValue) {

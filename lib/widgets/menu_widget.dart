@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../screens/main/pelanggaran_screen.dart';
 import '../screens/main/izin_screen.dart';
+import '../screens/main/perlengkapan_screen.dart';
 class MenuIkonWidget extends StatefulWidget {
   const MenuIkonWidget({Key? key}) : super(key: key);
 
@@ -88,8 +89,10 @@ class _MenuIkonWidgetState extends State<MenuIkonWidget> {
             );
             break;
           case 'Perlengkapan':
-            // TODO: Ganti dengan screen Perlengkapan
-            _showComingSoonDialog(context, item.label);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PerlengkapanScreen()),
+            );
             break;
           case 'Kerapian':
             // TODO: Ganti dengan screen Kerapian

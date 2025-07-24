@@ -90,7 +90,6 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
         }
       });
     } catch (e) {
-      // Tambahkan log jika diperlukan
     }
   }
 
