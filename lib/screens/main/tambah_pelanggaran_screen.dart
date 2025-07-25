@@ -112,7 +112,8 @@ class _PostPelanggaranScreenState extends State<PostPelanggaranScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditMode ? 'Edit Pelanggaran' : 'Tambah Pelanggaran'),
-        backgroundColor: Colors.red[900],
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -215,7 +216,8 @@ class _PostPelanggaranScreenState extends State<PostPelanggaranScreen> {
                 icon: const Icon(Icons.save),
                 label: Text(isEditMode ? 'Perbarui' : 'Simpan'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[800],
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),

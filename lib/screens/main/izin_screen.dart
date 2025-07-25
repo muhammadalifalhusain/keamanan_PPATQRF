@@ -23,7 +23,7 @@ class _IzinScreenState extends State<IzinScreen> {
     Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF263238),
+        backgroundColor: Colors.deepPurple,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -161,23 +161,44 @@ class _IzinScreenState extends State<IzinScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF263238),
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const TambahIzinScreen(),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.deepPurple.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-          );
-          if (result == true) {
-            setState(() {
-              _izinList = IzinService.fetchIzin(); 
-            });
-          }
-        },
-        child: const Icon(Icons.add, color: Colors.white),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TambahIzinScreen(),
+              ),
+            );
+            if (result == true) {
+              setState(() {
+                _izinList = IzinService.fetchIzin(); // atau panggil _refreshData jika ada
+              });
+            }
+          },
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          icon: const Icon(Icons.add_rounded),
+          label: Text(
+            'Tambah',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
+
     );
   }
 }

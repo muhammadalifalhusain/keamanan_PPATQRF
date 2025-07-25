@@ -72,14 +72,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF263238),
+        backgroundColor:  Colors.deepPurple,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
             Card(
-              color: const Color(0xFF263238),
+              color: Colors.deepPurple,
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),

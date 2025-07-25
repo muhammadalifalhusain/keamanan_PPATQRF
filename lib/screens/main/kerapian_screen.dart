@@ -185,7 +185,7 @@ class _KerapianScreenState extends State<KerapianScreen> with TickerProviderStat
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text('Data Kerapian'),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -467,11 +467,11 @@ class _KerapianScreenState extends State<KerapianScreen> with TickerProviderStat
             );
             if (result == true) _loadData();
           },
-          backgroundColor: Colors.teal,
+          backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add),
           label: Text(
-            'Tambah Data',
+            'Tambah',
             style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
           ),
         ),
@@ -513,16 +513,16 @@ class _KerapianScreenState extends State<KerapianScreen> with TickerProviderStat
 
   Widget _buildStatsRow(KerapianItem item) {
     final List<Map<String, dynamic>> stats = [
-      {'icon': Icons.beach_access, 'label': 'Sandal', 'value': item.sandal ?? '-'},
-      {'icon': Icons.sports_soccer, 'label': 'Sepatu', 'value': item.sepatu ?? '-'},
-      {'icon': Icons.soap, 'label': 'Alat Mandi', 'value': item.sandal ?? '-'},
+      {'label': 'Sandal', 'value': item.sandal ?? '-'},
+      {'label': 'Sepatu', 'value': item.sepatu ?? '-'},
+      {'label': 'Alat Mandi', 'value': item.sandal ?? '-'},
     ];
 
     return Row(
       children: stats.map((stat) {
         return Expanded(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.teal[50],
@@ -530,15 +530,10 @@ class _KerapianScreenState extends State<KerapianScreen> with TickerProviderStat
             ),
             child: Column(
               children: [
-                Icon(
-                  stat['icon'],
-                  size: 16,
-                  color: Colors.teal[600],
-                ),
                 Text(
                   stat['label'],
                   style: GoogleFonts.poppins(
-                    fontSize: 10,
+                    fontSize: 12,
                     color: Colors.teal[700],
                     fontWeight: FontWeight.w500,
                   ),
@@ -546,7 +541,7 @@ class _KerapianScreenState extends State<KerapianScreen> with TickerProviderStat
                 Text(
                   stat['value'],
                   style: GoogleFonts.poppins(
-                    fontSize: 10,
+                    fontSize: 12,
                     color: Colors.black,
                     fontWeight: FontWeight.bold
                   ),

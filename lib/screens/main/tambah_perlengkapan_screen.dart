@@ -5,10 +5,10 @@ import '../../models/santri_model.dart';
 import '../../services/perlengkapan_service.dart';
 import '../../services/santri_service.dart';
 import '../../utils/perlengkapan_items.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TambahPerlengkapanScreen extends StatefulWidget {
-  final int? perlengkapanId; // NULL berarti tambah, tidak null berarti edit
-
+  final int? perlengkapanId;
   const TambahPerlengkapanScreen({super.key, this.perlengkapanId});
 
   @override
@@ -133,45 +133,256 @@ class _TambahPerlengkapanScreenState extends State<TambahPerlengkapanScreen> {
     }
   }
 
+  Widget _buildSantriSearch() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Autocomplete<Santri>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          if (textEditingValue.text.isEmpty) return const Iterable<Santri>.empty();
+          return santriList.where((s) =>
+              s.nama.toLowerCase().contains(textEditingValue.text.toLowerCase()) ||
+              s.noInduk.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+        },
+        displayStringForOption: (Santri s) => '${s.nama} (${s.noInduk})',
+        onSelected: (Santri selection) {
+          setState(() {
+            selectedSantri = selection;
+            searchController.text = '${selection.nama} (${selection.noInduk})';
+          });
+        },
+        fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+          controller.text = searchController.text;
+          return TextFormField(
+            controller: controller,
+            focusNode: focusNode,
+            onEditingComplete: onEditingComplete,
+            style: GoogleFonts.poppins(fontSize: 14),
+            decoration: InputDecoration(
+              labelText: 'Pilih Santri',
+              labelStyle: GoogleFonts.poppins(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+              prefixIcon: Container(
+                margin: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.indigo[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.search,
+                  color: Colors.indigo[600],
+                  size: 20,
+                ),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.indigo, width: 2),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
+            validator: (_) => selectedSantri == null ? 'Pilih nama santri' : null,
+          );
+        },
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: MediaQuery.of(context).size.width - 32,
+                constraints: const BoxConstraints(maxHeight: 200),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: options.map((Santri option) {
+                    return InkWell(
+                      onTap: () => onSelected(option),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: Colors.grey[200]!),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo[50],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.person,
+                                color: Colors.indigo[600],
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    option.nama,
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    option.noInduk,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildKelayakanField(String label) {
     int? value = _items[label] ?? 0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+    bool isKelayakan = label.toLowerCase().contains('layak');
+    final optionTexts = isKelayakan ? ['Layak', 'Tidak Layak'] : ['Ada', 'Tidak Ada'];
+    final optionIcons = isKelayakan
+        ? [Icons.check_circle, Icons.cancel]
+        : [Icons.check, Icons.close];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(child: Text(label)),
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
           ToggleButtons(
             borderRadius: BorderRadius.circular(10),
+            selectedBorderColor: value == 0 ? Colors.green : Colors.red,
+            selectedColor: Colors.white,
+            fillColor: value == 0 ? Colors.green : Colors.red,
+            color: Colors.grey[600],
+            constraints: const BoxConstraints(minHeight: 40, minWidth: 80),
             isSelected: [value == 0, value == 1],
             onPressed: (index) {
               setState(() {
                 _items[label] = index;
               });
             },
-            children: const [
-              Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('Layak ✅')),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('Tidak Layak ❌')),
-            ],
+            children: List.generate(2, (index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(optionIcons[index], size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      optionTexts[index],
+                      style: GoogleFonts.poppins(fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ),
         ],
       ),
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.indigo),
+          ),
+        ),
+      );
     }
 
     final isEdit = widget.perlengkapanId != null;
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text(isEdit ? 'Edit Perlengkapan' : 'Tambah Perlengkapan'),
-        backgroundColor: const Color(0xFF5B913B),
+        elevation: 0,
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
+        title: Text(
+          isEdit ? 'Edit Perlengkapan' : 'Tambah Perlengkapan',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -179,102 +390,212 @@ class _TambahPerlengkapanScreenState extends State<TambahPerlengkapanScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: searchController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: 'Nama Santri',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () async {
-                      final selected = await showSearch<Santri?>(
-                        context: context,
-                        delegate: SantriSearchDelegate(santriList),
-                      );
-                      if (selected != null) {
-                        setState(() {
-                          selectedSantri = selected;
-                          searchController.text = selected.nama;
-                        });
-                      }
-                    },
+              _buildSantriSearch(),
+              
+              // Date Selection Card
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo[50],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.calendar_today,
+                        color: Colors.indigo[600],
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Tanggal",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _tanggal,
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.edit_calendar, size: 18),
+                      label: Text(
+                        'Ubah',
+                        style: GoogleFonts.poppins(fontSize: 12),
+                      ),
+                      onPressed: _selectDate,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.indigo,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Equipment Section
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.indigo[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.inventory_2,
+                            color: Colors.indigo[600],
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Kelengkapan Perlengkapan',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ..._items.keys.map((k) => _buildKelayakanField(k)).toList(),
+                  ],
+                ),
+              ),
+
+              // Notes Section
+              Container(
+                margin: const EdgeInsets.only(bottom: 24),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextFormField(
+                  controller: _keteranganController,
+                  maxLines: 3,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'Keterangan',
+                    labelStyle: GoogleFonts.poppins(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Container(
+                      margin: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.note_alt,
+                        color: Colors.indigo[600],
+                        size: 20,
+                      ),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                 ),
-                validator: (value) => value!.isEmpty ? 'Santri wajib dipilih' : null,
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Text("Tanggal: "),
-                  TextButton.icon(
-                    icon: const Icon(Icons.calendar_month),
-                    label: Text(_tanggal),
-                    onPressed: _selectDate,
+
+              // Submit Button
+              Container(
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ],
-              ),
-              const Divider(),
-              const Text('Jumlah Perlengkapan:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              ..._items.keys.map((k) => _buildKelayakanField(k)).toList(),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _keteranganController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Keterangan',
-                  border: OutlineInputBorder(),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(isEdit ? Icons.save : Icons.add, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        isEdit ? 'Simpan Perubahan' : 'Tambah Perlengkapan',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                icon: Icon(isEdit ? Icons.save : Icons.add),
-                onPressed: _submit,
-                label: Text(isEdit ? 'Simpan Perubahan' : 'Tambah'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5B913B),
-                  foregroundColor: Colors.white,
-                ),
-              )
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-// Santri Search Delegate (unchanged)
-class SantriSearchDelegate extends SearchDelegate<Santri?> {
-  final List<Santri> santriList;
-  SantriSearchDelegate(this.santriList);
-
-  @override
-  List<Widget> buildActions(BuildContext context) =>
-      [IconButton(onPressed: () => query = '', icon: const Icon(Icons.clear))];
-
-  @override
-  Widget buildLeading(BuildContext context) =>
-      IconButton(onPressed: () => close(context, null), icon: const Icon(Icons.arrow_back));
-
-  @override
-  Widget buildResults(BuildContext context) => _buildList();
-  @override
-  Widget buildSuggestions(BuildContext context) => _buildList();
-
-  Widget _buildList() {
-    final suggestions = santriList
-        .where((s) => s.nama.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) {
-        final santri = suggestions[index];
-        return ListTile(
-          title: Text(santri.nama),
-          onTap: () => close(context, santri),
-        );
-      },
     );
   }
 }

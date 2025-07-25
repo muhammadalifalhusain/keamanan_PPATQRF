@@ -4,6 +4,7 @@ import '../screens/main/pelanggaran_screen.dart';
 import '../screens/main/izin_screen.dart';
 import '../screens/main/perlengkapan_screen.dart';
 import '../screens/main/kerapian_screen.dart';
+import '../screens/main/pelanggaran_ketertiban_screen.dart';
 class MenuIkonWidget extends StatefulWidget {
   const MenuIkonWidget({Key? key}) : super(key: key);
 
@@ -102,8 +103,10 @@ class _MenuIkonWidgetState extends State<MenuIkonWidget> {
             );
             break;
           case 'Ketertiban':
-            // TODO: Ganti dengan screen Ketertiban
-            _showComingSoonDialog(context, item.label);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PelanggaranKetertibanScreen()),
+            );
             break;
           default:
             _showComingSoonDialog(context, item.label);

@@ -64,7 +64,7 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF263238),
+        backgroundColor:  Colors.deepPurple,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -136,7 +136,7 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
                       Text('Pengisi: ${item.namaPengisi}', style: GoogleFonts.poppins()),
                     ],
                   ),
-                  leading: const Icon(Icons.warning_amber, color: Colors.orange),
+                  
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -167,17 +167,38 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const PostPelanggaranScreen()),
-          );
-          _loadPelanggaran(); // Refresh setelah tambah
-        },
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
-        tooltip: 'Tambah Pelanggaran',
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.deepPurple.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PostPelanggaranScreen()),
+            );
+            if (result == true) {
+              _loadPelanggaran();
+            }
+          },
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          icon: const Icon(Icons.add_rounded),
+          label: Text(
+            'Tambah',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

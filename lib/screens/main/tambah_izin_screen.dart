@@ -206,7 +206,7 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(isEdit ? 'Edit Izin' : 'Tambah Izin'),
-        backgroundColor: const Color(0xFF263238),
+        backgroundColor:  Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -287,7 +287,7 @@ class _TambahIzinScreenState extends State<TambahIzinScreen> {
                         : "Simpan"),
                 onPressed: isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5B913B),
+                  backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(50),
                 ),
