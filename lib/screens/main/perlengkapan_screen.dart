@@ -4,6 +4,7 @@ import '../../models/perlengkapan_model.dart';
 import '../../services/perlengkapan_service.dart';
 import 'perlengkapan_detail_screen.dart';
 import 'tambah_perlengkapan_screen.dart';
+
 class PerlengkapanScreen extends StatefulWidget {
   const PerlengkapanScreen({super.key});
 
@@ -28,6 +29,41 @@ class _PerlengkapanScreenState extends State<PerlengkapanScreen> {
     setState(() {
       _loadData();
     });
+  }
+
+  Future<void> _confirmDelete(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Konfirmasi'),
+        content: const Text('Apakah Anda yakin ingin menghapus data ini?'),
+        actions: [
+          TextButton(
+            child: const Text('Batal'),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ElevatedButton(
+            child: const Text('Hapus'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await PerlengkapanService.deletePerlengkapan(id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data berhasil dihapus')),
+        );
+        _refreshData();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menghapus data: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -77,7 +113,28 @@ class _PerlengkapanScreenState extends State<PerlengkapanScreen> {
                     title: Text(item.nama),
                     subtitle: Text('Tanggal: ${item.tanggal}'),
                     isThreeLine: true,
-                    trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    trailing: Wrap(
+                      spacing: 8,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.orange),
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => TambahPerlengkapanScreen(perlengkapanId: item.id),
+                              ),
+                            );
+                            if (result == true) _refreshData();
+                          },
+                        ),
+
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmDelete(item.id),
+                        ),
+                      ],
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../screens/main/pelanggaran_screen.dart';
 import '../screens/main/izin_screen.dart';
 import '../screens/main/perlengkapan_screen.dart';
+import '../screens/main/kerapian_screen.dart';
 class MenuIkonWidget extends StatefulWidget {
   const MenuIkonWidget({Key? key}) : super(key: key);
 
@@ -95,8 +96,10 @@ class _MenuIkonWidgetState extends State<MenuIkonWidget> {
             );
             break;
           case 'Kerapian':
-            // TODO: Ganti dengan screen Kerapian
-            _showComingSoonDialog(context, item.label);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const KerapianScreen()),
+            );
             break;
           case 'Ketertiban':
             // TODO: Ganti dengan screen Ketertiban
